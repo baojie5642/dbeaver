@@ -684,8 +684,13 @@ public abstract class SQLEditorBase extends BaseTextEditor implements DBPContext
         if (parserContext == null) {
             return null;
         }
-        ITextSelection selection = (ITextSelection) getSelectionProvider().getSelection();
-        return SQLScriptParser.extractActiveQuery(parserContext, selection.getOffset(), selection.getLength());
+        final ITextSelection selection = (ITextSelection) getSelectionProvider().getSelection();
+        if (selection instanceof IBlockTextSelection) {
+            final IBlockTextSelection blockSelection = (IBlockTextSelection) selection;
+            return SQLScriptParser.extractActiveQuery(parserContext, blockSelection.getRegions());
+        } else {
+            return SQLScriptParser.extractActiveQuery(parserContext, new IRegion[]{new Region(selection.getOffset(), selection.getLength())});
+        }
     }
 
     public SQLScriptElement extractQueryAtPos(int currentPos) {
